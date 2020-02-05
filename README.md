@@ -1,6 +1,6 @@
 # magento114
 
-Please add filed to database before installation
+Please add sampledate to database before installation
 
 ```bash
 cd magento114 or the directory

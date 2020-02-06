@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Adminhtml
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -34,10 +34,6 @@
 
 class Mage_Adminhtml_Model_Config_Data extends Varien_Object
 {
-    const SCOPE_DEFAULT  = 'default';
-    const SCOPE_WEBSITES = 'websites';
-    const SCOPE_STORES   = 'stores';
-
     /**
      * Config data for sections
      *
@@ -272,15 +268,15 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
     protected function _getScope()
     {
         if ($this->getStore()) {
-            $scope   = self::SCOPE_STORES;
+            $scope   = 'stores';
             $scopeId = (int)Mage::getConfig()->getNode('stores/' . $this->getStore() . '/system/store/id');
             $scopeCode = $this->getStore();
         } elseif ($this->getWebsite()) {
-            $scope   = self::SCOPE_WEBSITES;
+            $scope   = 'websites';
             $scopeId = (int)Mage::getConfig()->getNode('websites/' . $this->getWebsite() . '/system/website/id');
             $scopeCode = $this->getWebsite();
         } else {
-            $scope   = self::SCOPE_DEFAULT;
+            $scope   = 'default';
             $scopeId = 0;
             $scopeCode = '';
         }
@@ -366,101 +362,5 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
             $this->_configRoot = Mage::getConfig()->getNode(null, $this->getScope(), $this->getScopeCode());
         }
         return $this->_configRoot;
-    }
-
-    /**
-     * Secure set groups
-     *
-     * @param array $groups
-     * @return Mage_Adminhtml_Model_Config_Data
-     * @throws Mage_Core_Exception
-     */
-    public function setGroupsSecure($groups)
-    {
-        $this->_validate();
-        $this->_getScope();
-
-        $groupsSecure = array();
-        $section = $this->getSection();
-        $sections = Mage::getModel('adminhtml/config')->getSections();
-
-        foreach ($groups as $group => $groupData) {
-            $groupConfig = $sections->descend($section . '/groups/' . $group);
-            foreach ($groupData['fields'] as $field => $fieldData) {
-                $fieldName = $field;
-                if ($groupConfig && $groupConfig->clone_fields) {
-                    if ($groupConfig->clone_model) {
-                        $cloneModel = Mage::getModel((string)$groupConfig->clone_model);
-                    } else {
-                        Mage::throwException(
-                            $this->__('Config form fieldset clone model required to be able to clone fields')
-                        );
-                    }
-                    foreach ($cloneModel->getPrefixes() as $prefix) {
-                        if (strpos($field, $prefix['field']) === 0) {
-                            $field = substr($field, strlen($prefix['field']));
-                        }
-                    }
-                }
-                $fieldConfig = $sections->descend($section . '/groups/' . $group . '/fields/' . $field);
-                if (!$fieldConfig) {
-                    $node = $sections->xpath($section . '//' . $group . '[@type="group"]/fields/' . $field);
-                    if ($node) {
-                        $fieldConfig = $node[0];
-                    }
-                }
-                if (($groupConfig ? !$groupConfig->dynamic_group : true) && !$this->_isValidField($fieldConfig)) {
-                    Mage::throwException(Mage::helper('adminhtml')->__('Wrong field specified.'));
-                }
-                $groupsSecure[$group]['fields'][$fieldName] = $fieldData;
-            }
-        }
-
-        $this->setGroups($groupsSecure);
-
-        return $this;
-    }
-
-    /**
-     * Check field visibility by scope
-     *
-     * @param Mage_Core_Model_Config_Element $field
-     * @return bool
-     */
-    protected function _isValidField($field)
-    {
-        if (!$field) {
-            return false;
-        }
-
-        switch ($this->getScope()) {
-            case self::SCOPE_DEFAULT:
-                return (bool)(int)$field->show_in_default;
-                break;
-            case self::SCOPE_WEBSITES:
-                return (bool)(int)$field->show_in_website;
-                break;
-            case self::SCOPE_STORES:
-                return (bool)(int)$field->show_in_store;
-                break;
-        }
-
-        return true;
-    }
-
-    /**
-     * Select group setter is secure or not based on the configuration
-     *
-     * @param array $groups
-     * @return Mage_Adminhtml_Model_Config_Data
-     * @throws Mage_Core_Exception
-     */
-    public function setGroupsSelector($groups)
-    {
-        if (Mage::getStoreConfigFlag('admin/security/secure_system_configuration_save_disabled')) {
-            return $this->setGroups($groups);
-        }
-
-        return $this->setGroupsSecure($groups);
     }
 }

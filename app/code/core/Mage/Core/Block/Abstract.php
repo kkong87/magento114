@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -1004,22 +1004,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     }
 
     /**
-     * Generate security url by route and parameters (add form key if "Add Secret Key to URLs" disabled)
-     *
-     * @param string $route
-     * @param array $params
-     *
-     * @return string
-     */
-    public function getUrlSecure($route = '', $params = array())
-    {
-        if (!Mage::helper('adminhtml')->isEnabledSecurityKeyUrl()) {
-            $params[Mage_Core_Model_Url::FORM_KEY] = $this->getFormKey();
-        }
-        return $this->getUrl($route, $params);
-    }
-
-    /**
      * Generate base64-encoded url by route and parameters
      *
      * @param   string $route
@@ -1391,16 +1375,6 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             return null;
         }
         return $this->getData('cache_lifetime');
-    }
-
-    /**
-     * Retrieve Session Form Key
-     *
-     * @return string
-     */
-    public function getFormKey()
-    {
-        return Mage::getSingleton('core/session')->getFormKey();
     }
 
     /**

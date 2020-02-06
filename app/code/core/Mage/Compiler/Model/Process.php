@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Compiler
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -42,9 +42,6 @@ class Mage_Compiler_Model_Process
     protected $_processedClasses= array();
 
     protected $_controllerFolders = array();
-
-    /** $_collectLibs library list array */
-    protected $_collectLibs = array();
 
     public function __construct($options=array())
     {
@@ -130,9 +127,6 @@ class Mage_Compiler_Model_Process
             if (strpos(str_replace($this->_includeDir, '', $target), '-')
                 || !in_array(substr($source, strlen($source)-4, 4), array('.php'))) {
                 return $this;
-            }
-            if (!$firstIteration && stripos($source, Mage::getBaseDir('lib') . DS) !== false) {
-                $this->_collectLibs[] = $target;
             }
             copy($source, $target);
         }
@@ -347,11 +341,6 @@ class Mage_Compiler_Model_Process
     {
         $sortedClasses = array();
         foreach ($classes as $className) {
-            /** Skip iteration if this class has already been moved to the includes folder from the lib */
-            if (array_search($this->_includeDir . DS . $className . '.php', $this->_collectLibs)) {
-                continue;
-            }
-
             $implements = array_reverse(class_implements($className));
             foreach ($implements as $class) {
                 if (!in_array($class, $sortedClasses) && !in_array($class, $this->_processedClasses) && strstr($class, '_')) {
@@ -394,6 +383,7 @@ class Mage_Compiler_Model_Process
 
     public function clear()
     {
+        $this->registerIncludePath(false);
         if (is_dir($this->_includeDir)) {
             mageDelTree($this->_includeDir);
         }
@@ -409,6 +399,7 @@ class Mage_Compiler_Model_Process
     {
         $this->_collectFiles();
         $this->_compileFiles();
+        $this->registerIncludePath();
         return $this;
 
     }
@@ -421,7 +412,7 @@ class Mage_Compiler_Model_Process
      */
     public function registerIncludePath($flag = true)
     {
-        $file = $this->getConfigFilePath();
+        $file = $this->_compileDir.DS.'config.php';
         if (is_writeable($file)) {
             $content = file_get_contents($file);
             $content = explode("\n", $content);
@@ -450,38 +441,11 @@ class Mage_Compiler_Model_Process
         if (!is_writeable($this->_compileDir)) {
             $result[] = Mage::helper('compiler')->__('Directory "%s" must be writeable', $this->_compileDir);
         }
-        $file = $this->getConfigFilePath();
+        $file = $this->_compileDir.DS.'config.php';
         if (!is_writeable($file)) {
             $result[] = Mage::helper('compiler')->__('File "%s" must be writeable', $file);
         }
         return $result;
     }
 
-    /**
-     * Check if constant has been defined in file
-     *
-     * @return bool
-     */
-    public function isConstNotDefineInFile()
-    {
-        $file = $this->getConfigFilePath();
-        if (is_writeable($file)) {
-            foreach (file($file) as $line) {
-                if (stristr($line, 'COMPILER_INCLUDE_PATH')) {
-                    return (bool) stristr($line, '#');
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Return config file path
-     *
-     * @return string
-     */
-    public function getConfigFilePath()
-    {
-        return $this->_compileDir . DS . 'config.php';
-    }
 }

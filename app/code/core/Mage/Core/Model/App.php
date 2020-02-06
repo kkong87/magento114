@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -71,22 +71,6 @@ class Mage_Core_Model_App
      *
      */
     const ADMIN_STORE_ID = 0;
-
-    /**
-     * The absolute minimum of password length for all types of passwords
-     *
-     * With changing this value also need to change:
-     * 1. in `js/prototype/validation.js` declarations `var minLength = 7;` in two places;
-     * 2. in `app/code/core/Mage/Customer/etc/system.xml`
-     *    comments for fields `min_password_length` and `min_admin_password_length`
-     *    `<comment>Please enter a number 7 or greater in this field.</comment>`;
-     * 3. in `app/code/core/Mage/Customer/etc/config.xml` value `<min_password_length>7</min_password_length>`
-     *    and, maybe, value `<min_admin_password_length>14</min_admin_password_length>`
-     *    (if the absolute minimum of password length is higher then this value);
-     * 4. maybe, the value of deprecated `const MIN_PASSWORD_LENGTH` in `app/code/core/Mage/Admin/Model/User.php`,
-     *    (if the absolute minimum of password length is higher then this value).
-     */
-    const ABSOLUTE_MIN_PASSWORD_LENGTH = 7;
 
     /**
      * Application loaded areas array

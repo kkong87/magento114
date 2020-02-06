@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Authorizenet
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -389,12 +389,9 @@ class Mage_Authorizenet_Model_Directpost extends Mage_Paygate_Model_Authorizenet
     public function validateResponse()
     {
         $response = $this->getResponse();
-        $xSHA2Hash = $response->getData('x_SHA2_Hash');
-        $hashConfigKey = !empty($xSHA2Hash) ? 'signature_key' : 'trans_md5';
-
-        //hash check
-        if (!$this->getConfigData($hashConfigKey)
-            || !$response->isValidHash($this->getConfigData($hashConfigKey), $this->getConfigData('login'))
+        //md5 check
+        if (!$this->getConfigData('trans_md5') || !$this->getConfigData('login') ||
+            !$response->isValidHash($this->getConfigData('trans_md5'), $this->getConfigData('login'))
         ) {
             Mage::throwException(
                 Mage::helper('authorizenet')->__('Response hash validation failed. Transaction declined.')
@@ -502,7 +499,7 @@ class Mage_Authorizenet_Model_Directpost extends Mage_Paygate_Model_Authorizenet
      */
     public function checkTransId()
     {
-        if (!$this->getResponse()->getXTransId() && ('0' !== $this->getResponse()->getXTransId())) {
+        if (!$this->getResponse()->getXTransId()) {
             Mage::throwException(
                 Mage::helper('authorizenet')->__('Payment authorization error. Transacion id is empty.')
             );

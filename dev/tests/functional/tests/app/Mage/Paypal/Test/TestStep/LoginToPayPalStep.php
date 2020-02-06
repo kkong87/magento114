@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Tests
  * @package     Tests_Functional
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 namespace Mage\Paypal\Test\TestStep;
@@ -99,28 +99,12 @@ class LoginToPayPalStep implements TestStepInterface
             : $this->paypalPage->getOldReviewBlock();
         $reviewBlock->logOut();
 
-        $reviewBlock->waitLoader();
-        $payPalLoginBlock = $this->getActualBlock();
+        $payPalLoginBlock = $this->paypalPage->getLoginBlock()->isVisible()
+            ? $this->paypalPage->getLoginBlock()
+            : $this->paypalPage->getOldLoginBlock();
         $payPalLoginBlock->fill($this->customer);
         $payPalLoginBlock->submit();
         $payPalLoginBlock->switchOffPayPalFrame();
         $reviewBlock->waitLoader();
-    }
-
-    /**
-     * Returns actual login block by selector
-     *
-     * @return \Mage\Paypal\Test\Block\NewLogin|\Mage\Paypal\Test\Block\Login|\Mage\Paypal\Test\Block\OldLogin
-     */
-    protected function getActualBlock()
-    {
-        if ($this->paypalPage->getNewLoginBlock()->isBlockActive()) {
-            $returnBlock = $this->paypalPage->getNewLoginBlock();
-        } elseif ($this->paypalPage->getLoginBlock()->isBlockActive()) {
-            $returnBlock = $this->paypalPage->getLoginBlock();
-        } else {
-            $returnBlock = $this->paypalPage->getOldLoginBlock();
-        }
-        return $returnBlock;
     }
 }

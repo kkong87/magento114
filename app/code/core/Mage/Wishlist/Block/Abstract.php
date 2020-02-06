@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Wishlist
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -168,7 +168,7 @@ abstract class Mage_Wishlist_Block_Abstract extends Mage_Catalog_Block_Product_A
      */
     public function getItemRemoveUrl($item)
     {
-        return $this->getItemRemoveUrlCustom($item);
+        return $this->_getHelper()->getRemoveUrl($item);
     }
 
     /**
@@ -179,7 +179,7 @@ abstract class Mage_Wishlist_Block_Abstract extends Mage_Catalog_Block_Product_A
      */
     public function getItemAddToCartUrl($item)
     {
-        return $this->getItemAddToCartUrlCustom($item);
+        return $this->_getHelper()->getAddToCartUrl($item);
     }
 
     /**
@@ -201,7 +201,7 @@ abstract class Mage_Wishlist_Block_Abstract extends Mage_Catalog_Block_Product_A
      */
     public function getAddToWishlistUrl($product)
     {
-        return $this->getAddToWishlistUrlCustom($product);
+        return $this->_getHelper()->getAddUrl($product);
     }
 
      /**
@@ -407,50 +407,5 @@ abstract class Mage_Wishlist_Block_Abstract extends Mage_Catalog_Block_Product_A
             }
         }
         return parent::getProductUrl($product, $additional);
-    }
-
-    /**
-     * Retrieve URL for adding Product to wishlist with or without Form Key
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function getAddToWishlistUrlCustom($product, $addFormKey = true)
-    {
-        if (!$addFormKey) {
-            return $this->_getHelper()->getAddUrlWithCustomParams($product, array(), false);
-        }
-        return $this->_getHelper()->getAddUrl($product);
-    }
-
-    /**
-     * Retrieve URL for Removing item from wishlist with or without Form Key
-     *
-     * @param Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function getItemRemoveUrlCustom($item, $addFormKey = true)
-    {
-        if (!$addFormKey) {
-            return $this->_getHelper()->getRemoveUrlCustom($item, false);
-        }
-        return $this->_getHelper()->getRemoveUrl($item);
-    }
-
-    /**
-     * Retrieve Add Item to shopping cart URL with or without Form Key
-     *
-     * @param string|Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function getItemAddToCartUrlCustom($item, $addFormKey = true)
-    {
-        if (!$addFormKey) {
-            return $this->_getHelper()->getAddToCartUrlCustom($item, false);
-        }
-        return $this->_getHelper()->getAddToCartUrl($item);
     }
 }

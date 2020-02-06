@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Admin
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -157,13 +157,15 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             $e->setMessage(
                 Mage::helper('adminhtml')->__('You did not sign in correctly or your account is temporarily disabled.')
             );
-            $this->_loginFailed($e, $request, $username, $e->getMessage());
-        } catch (Exception $e) {
-            $message = Mage::helper('adminhtml')->__('An error occurred while logging in.');
-            $this->_loginFailed($e, $request, $username, $message);
+            Mage::dispatchEvent('admin_session_user_login_failed',
+                array('user_name' => $username, 'exception' => $e));
+            if ($request && !$request->getParam('messageSent')) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+                $request->setParam('messageSent', true);
+            }
         }
 
-        return isset($user) ? $user : null;
+        return $user;
     }
 
     /**
@@ -272,31 +274,6 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
             return $request->getRequestUri();
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Login failed process
-     *
-     * @param Exception $e
-     * @param string $username
-     * @param string $message
-     * @param Mage_Core_Controller_Request_Http $request
-     * @return void
-     */
-    protected function _loginFailed($e, $request, $username, $message)
-    {
-        try {
-            Mage::dispatchEvent('admin_session_user_login_failed', array(
-                'user_name' => $username,
-                'exception' => $e
-            ));
-        } catch (Exception $e) {
-        }
-
-        if ($request && !$request->getParam('messageSent')) {
-            Mage::getSingleton('adminhtml/session')->addError($message);
-            $request->setParam('messageSent', true);
         }
     }
 }

@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Dataflow
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -56,20 +56,6 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
 {
     const DEFAULT_EXPORT_PATH = 'var/export';
     const DEFAULT_EXPORT_FILENAME = 'export_';
-
-    /**
-     * Product table permanent attributes
-     *
-     * @var array
-     */
-    protected $_productTablePermanentAttributes = array('sku');
-
-    /**
-     * Customer table permanent attributes
-     *
-     * @var array
-     */
-    protected $_customerTablePermanentAttributes = array('email', 'website');
 
     protected function _construct()
     {
@@ -165,9 +151,6 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
             ->setProfileId($this->getId())
             ->setActionCode($this->getOrigData('profile_id') ? 'update' : 'create')
             ->save();
-        $csvParser = new Varien_File_Csv();
-        $xmlParser = new DOMDocument();
-        $newUploadedFilenames = array();
 
         if (isset($_FILES['file_1']['tmp_name']) || isset($_FILES['file_2']['tmp_name'])
         || isset($_FILES['file_3']['tmp_name'])) {
@@ -177,58 +160,9 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                     $uploader->setAllowedExtensions(array('csv','xml'));
                     $path = Mage::app()->getConfig()->getTempVarDir() . '/import/';
                     $uploader->save($path);
-                    $uploadFile = $uploader->getUploadedFileName();
-
-                    if ($_FILES['file_' . ($index + 1)]['type'] == "text/csv") {
-                        $fileData = $csvParser->getData($path . $uploadFile);
-                        $fileData = array_shift($fileData);
-                    } else {
-                        try {
-                            $xmlParser->loadXML(file_get_contents($path . $uploadFile));
-                            $cells = $this->getNode($xmlParser, 'Worksheet')->item(0);
-                            $cells = $this->getNode($cells, 'Row')->item(0);
-                            $cells = $this->getNode($cells, 'Cell');
-                            $fileData = array();
-                            foreach ($cells as $cell) {
-                                $fileData[] = $this->getNode($cell, 'Data')->item(0)->nodeValue;
-                            }
-                        } catch (Exception $e) {
-                            foreach ($newUploadedFilenames as $k => $v) {
-                                unlink($path . $v);
-                            }
-                            unlink($path . $uploadFile);
-                            Mage::throwException(
-                                Mage::helper('Dataflow')->__(
-                                    'Upload failed. Wrong data format in file: %s.',
-                                    $uploadFile
-                                )
-                            );
-                        }
-                    }
-
-                    if ($this->_data['entity_type'] == 'customer') {
-                        $attributes = $this->_customerTablePermanentAttributes;
-                    } else {
-                        $attributes = $this->_productTablePermanentAttributes;
-                    }
-                    $colsAbsent = array_diff($attributes, $fileData);
-                    if ($colsAbsent) {
-                        foreach ($newUploadedFilenames as $k => $v) {
-                            unlink($path . $v);
-                        }
-                        unlink($path . $uploadFile);
-                        Mage::throwException(
-                            Mage::helper('Dataflow')->__(
-                                'Upload failed. Can not find required columns: %s in file %s.',
-                                implode(', ', $colsAbsent),
-                                $uploadFile
-                            )
-                        );
-                    }
-                    if ($uploadFile) {
+                    if ($uploadFile = $uploader->getUploadedFileName()) {
                         $newFilename = 'import-' . date('YmdHis') . '-' . ($index+1) . '_' . $uploadFile;
                         rename($path . $uploadFile, $path . $newFilename);
-                        $newUploadedFilenames[] = $newFilename;
                     }
                 }
                 //BOM deleting for UTF files
@@ -496,21 +430,5 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
 echo "<xmp>" . $xml . "</xmp>";
 die;*/
         return $this;
-    }
-
-    /**
-     * Get node from xml object
-     *
-     * @param object $xmlObject
-     * @param string $nodeName
-     * @return object
-     * @throws Exception
-     */
-    protected function getNode($xmlObject, $nodeName)
-    {
-        if ($xmlObject != null) {
-            return $xmlObject->getElementsByTagName($nodeName);
-        }
-        Mage::throwException(Mage::helper('Dataflow')->__('Invalid node.'));
     }
 }

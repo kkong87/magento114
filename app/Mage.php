@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 define('DS', DIRECTORY_SEPARATOR);
@@ -52,9 +52,6 @@ if (defined('COMPILER_INCLUDE_PATH')) {
 }
 
 Varien_Autoload::register();
-
-include_once "phpseclib/bootstrap.php";
-include_once "mcryptcompat/mcrypt.php";
 
 /**
  * Main Mage hub class
@@ -147,7 +144,7 @@ final class Mage
      * @var string
      * @static
      */
-    static private $_currentEdition = self::EDITION_ENTERPRISE;
+    static private $_currentEdition = self::EDITION_COMMUNITY;
 
     /**
      * Gets the current Magento version string
@@ -172,9 +169,9 @@ final class Mage
     {
         return array(
             'major'     => '1',
-            'minor'     => '14',
-            'revision'  => '4',
-            'patch'     => '4',
+            'minor'     => '9',
+            'revision'  => '3',
+            'patch'     => '8',
             'stability' => '',
             'number'    => '',
         );
@@ -808,22 +805,16 @@ final class Mage
         static $loggers = array();
 
         $level  = is_null($level) ? Zend_Log::DEBUG : $level;
-        $file = empty($file) ?
-            (string) self::getConfig()->getNode('dev/log/file', Mage_Core_Model_Store::DEFAULT_CODE) : basename($file);
+        $file = empty($file) ? 'system.log' : basename($file);
 
         // Validate file extension before save. Allowed file extensions: log, txt, html, csv
-        $_allowedFileExtensions = explode(
-            ',',
-            (string) self::getConfig()->getNode('dev/log/allowedFileExtensions', Mage_Core_Model_Store::DEFAULT_CODE)
-        );
-        $logDir = self::getBaseDir('var') . DS . 'log';
-        $validatedFileExtension = pathinfo($file, PATHINFO_EXTENSION);
-        if (!$validatedFileExtension || !in_array($validatedFileExtension, $_allowedFileExtensions)) {
+        if (!self::helper('log')->isLogFileExtensionValid($file)) {
             return;
         }
 
         try {
             if (!isset($loggers[$file])) {
+                $logDir  = self::getBaseDir('var') . DS . 'log';
                 $logFile = $logDir . DS . $file;
 
                 if (!is_dir($logDir)) {

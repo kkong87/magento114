@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Compiler
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -83,24 +83,10 @@ class Mage_Compiler_Adminhtml_Compiler_ProcessController extends Mage_Adminhtml_
         /**
          * Add redirect heades before clear compiled sources
          */
-        if ($this->_getCompiler()->isConstNotDefineInFile()) {
-            if (defined('COMPILER_INCLUDE_PATH') !== false) {
-                Mage::getSingleton('adminhtml/session')->addError(
-                    Mage::helper('compiler')->__('Operation in progress. Please try later')
-                );
-                $this->_redirect('*/*/');
-            } else {
-                $this->_getCompiler()->clear();
-                $this->_redirect('*/*/run');
-                $this->getResponse()->sendHeaders();
-                exit;
-            }
-        } else {
-            Mage::getSingleton('adminhtml/session')->addError(
-                Mage::helper('compiler')->__('Please, press disable button before run compilation process')
-            );
-            $this->_redirect('*/*/');
-        }
+        $this->_redirect('*/*/run');
+        $this->_getCompiler()->clear();
+        $this->getResponse()->sendHeaders();
+        exit;
     }
 
     public function disableAction()

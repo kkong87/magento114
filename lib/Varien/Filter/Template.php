@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Varien
  * @package     Varien_Filter
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -289,8 +289,6 @@ class Varien_Filter_Template implements Zend_Filter_Interface
         $stackVars = $tokenizer->tokenize();
         $result = $default;
         $last = 0;
-        /** @var $emailPathValidator Mage_Adminhtml_Model_Email_PathValidator */
-        $emailPathValidator = $this->getEmailPathValidator();
         for($i = 0; $i < count($stackVars); $i ++) {
             if ($i == 0 && isset($this->_templateVars[$stackVars[$i]['name']])) {
                 // Getting of template value
@@ -307,13 +305,9 @@ class Varien_Filter_Template implements Zend_Filter_Interface
                     if (method_exists($stackVars[$i-1]['variable'], $stackVars[$i]['name'])
                         || substr($stackVars[$i]['name'], 0, 3) == 'get'
                     ) {
-                        $isEncrypted = false;
-                        if ($stackVars[$i]['name'] == 'getConfig') {
-                            $isEncrypted = $emailPathValidator->isValid($stackVars[$i]['args']);
-                        }
                         $stackVars[$i]['variable'] = call_user_func_array(
                             array($stackVars[$i-1]['variable'], $stackVars[$i]['name']),
-                            !$isEncrypted ? $stackVars[$i]['args'] : array(null)
+                            $stackVars[$i]['args']
                         );
                     }
                 }
@@ -327,15 +321,5 @@ class Varien_Filter_Template implements Zend_Filter_Interface
         }
         Varien_Profiler::stop("email_template_proccessing_variables");
         return $result;
-    }
-
-    /**
-     * Retrieve model object
-     *
-     * @return Mage_Core_Model_Abstract
-     */
-    protected function getEmailPathValidator()
-    {
-        return Mage::getModel('adminhtml/email_pathValidator');
     }
 }

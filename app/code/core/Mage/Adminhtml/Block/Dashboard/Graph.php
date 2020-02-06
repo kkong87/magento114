@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Adminhtml
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
     /**
      * Api URL
      */
-    const API_URL = 'https://image-charts.com/chart';
+    const API_URL = 'http://chart.apis.google.com/chart';
 
     /**
      * All series
@@ -97,8 +97,6 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
     /**
      * Google chart api data encoding
-     *
-     * @deprecated since the Google Image Charts API not accessible from March 14, 2019
      *
      * @var string
      */
@@ -192,9 +190,7 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
             'cht'  => 'lc',
             'chf'  => 'bg,s,f4f4f4|c,lg,90,ffffff,0.1,ededed,0',
             'chm'  => 'B,f4d4b2,0,0,0',
-            'chco' => 'db4814',
-            'chxs' => '0,0,11|1,0,11',
-            'chma' => '15,15,15,15'
+            'chco' => 'db4814'
         );
 
         $this->_allSeries = $this->getRowsData($this->_dataRows);
@@ -268,11 +264,20 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
         $this->_axisLabels['x'] = $dates;
         $this->_allSeries = $datas;
 
-        // Image-Charts Awesome data format values
-        $params['chd'] = "a:";
-        $dataDelimiter = ",";
-        $dataSetdelimiter = "|";
-        $dataMissing = "_";
+        //Google encoding values
+        if ($this->_encoding == "s") {
+            // simple encoding
+            $params['chd'] = "s:";
+            $dataDelimiter = "";
+            $dataSetdelimiter = ",";
+            $dataMissing = "_";
+        } else {
+            // extended encoding
+            $params['chd'] = "e:";
+            $dataDelimiter = "";
+            $dataSetdelimiter = ",";
+            $dataMissing = "__";
+        }
 
         // process each string in the array, and find the max length
         foreach ($this->getAllSeries() as $index => $serie) {
@@ -318,14 +323,38 @@ class Mage_Adminhtml_Block_Dashboard_Graph extends Mage_Adminhtml_Block_Dashboar
 
         foreach ($this->getAllSeries() as $index => $serie) {
             $thisdataarray = $serie;
-            for ($j = 0; $j < sizeof($thisdataarray); $j++) {
-                $currentvalue = $thisdataarray[$j];
-                if (is_numeric($currentvalue)) {
-                    $ylocation = $yorigin + $currentvalue;
-                    array_push($chartdata, $ylocation . $dataDelimiter);
-                } else {
-                    array_push($chartdata, $dataMissing . $dataDelimiter);
+            if ($this->_encoding == "s") {
+                // SIMPLE ENCODING
+                for ($j = 0; $j < sizeof($thisdataarray); $j++) {
+                    $currentvalue = $thisdataarray[$j];
+                    if (is_numeric($currentvalue)) {
+                        $ylocation = round((strlen($this->_simpleEncoding)-1) * ($yorigin + $currentvalue) / $yrange);
+                        array_push($chartdata, substr($this->_simpleEncoding, $ylocation, 1) . $dataDelimiter);
+                    } else {
+                        array_push($chartdata, $dataMissing . $dataDelimiter);
+                    }
                 }
+                // END SIMPLE ENCODING
+            } else {
+                // EXTENDED ENCODING
+                for ($j = 0; $j < sizeof($thisdataarray); $j++) {
+                    $currentvalue = $thisdataarray[$j];
+                    if (is_numeric($currentvalue)) {
+                        if ($yrange) {
+                         $ylocation = (4095 * ($yorigin + $currentvalue) / $yrange);
+                        } else {
+                          $ylocation = 0;
+                        }
+                        $firstchar = floor($ylocation / 64);
+                        $secondchar = $ylocation % 64;
+                        $mappedchar = substr($this->_extendedEncoding, $firstchar, 1)
+                            . substr($this->_extendedEncoding, $secondchar, 1);
+                        array_push($chartdata, $mappedchar . $dataDelimiter);
+                    } else {
+                        array_push($chartdata, $dataMissing . $dataDelimiter);
+                    }
+                }
+                // ============= END EXTENDED ENCODING =============
             }
             array_push($chartdata, $dataSetdelimiter);
         }

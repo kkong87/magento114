@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Eav
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -244,15 +244,6 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract
         $value = $object->getData($attrCode);
         if ($this->getAttribute()->getIsRequired() && $this->getAttribute()->isValueEmpty($value)) {
             return false;
-        }
-
-        //Validate serialized data
-        if (!Mage::helper('core/string')->validateSerializedObject($value)) {
-            $label = $this->getAttribute()->getFrontend()->getLabel();
-            throw Mage::exception(
-                'Mage_Eav',
-                Mage::helper('eav')->__('The value of attribute "%s" contains invalid data.', $label)
-            );
         }
 
         if ($this->getAttribute()->getIsUnique()

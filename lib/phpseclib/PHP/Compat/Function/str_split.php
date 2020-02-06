@@ -12,7 +12,6 @@
  * @since       PHP 5
  * @require     PHP 4.0.0 (user_error)
  */
-/*
 function php_compat_str_split($string, $split_length = 1)
 {
     if (!is_scalar($split_length)) {
@@ -58,4 +57,3 @@ if (!function_exists('str_split')) {
         return php_compat_str_split($string, $split_length);
     }
 }
-*/

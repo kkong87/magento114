@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <!--
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/afl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -21,8 +21,8 @@
  *
  * @category    Mage
  * @package     Mage_Captcha
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright   Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
 <config>
@@ -78,14 +78,6 @@
                     </captcha>
                 </observers>
             </controller_action_predispatch_customer_account_createpost>
-            <controller_action_predispatch_wishlist_index_send>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>checkWishlistSharing</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_wishlist_index_send>
             <controller_action_predispatch_adminhtml_index_forgotpassword>
                 <observers>
                     <captcha>
@@ -130,14 +122,6 @@
                     </captcha_reset_attempt>
                 </observers>
             </admin_session_user_login_success>
-            <controller_action_predispatch_sendfriend_product_sendmail>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>checkSendfriendSend</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_sendfriend_product_sendmail>
         </events>
     </global>
     <frontend>
@@ -222,8 +206,6 @@
                     <user_forgotpassword>1</user_forgotpassword>
                     <guest_checkout>1</guest_checkout>
                     <register_during_checkout>1</register_during_checkout>
-                    <wishlist_sharing>1</wishlist_sharing>
-                    <sendfriend_send>1</sendfriend_send>
                 </always_for>
             </captcha>
         </customer>
@@ -251,12 +233,6 @@
                     <register_during_checkout>
                         <label>Register during Checkout</label>
                     </register_during_checkout>
-                    <wishlist_sharing>
-                        <label>Share Wishlist</label>
-                    </wishlist_sharing>
-                    <sendfriend_send>
-                        <label>Email Product to a Friend</label>
-                    </sendfriend_send>
                 </areas>
             </frontend>
             <backend>

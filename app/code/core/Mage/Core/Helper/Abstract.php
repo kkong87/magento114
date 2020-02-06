@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -277,45 +277,7 @@ abstract class Mage_Core_Helper_Abstract
      */
     public function escapeUrl($data)
     {
-        return htmlspecialchars(
-            $this->escapeScriptIdentifiers((string) $data),
-            ENT_COMPAT | ENT_HTML5 | ENT_HTML401,
-            'UTF-8'
-        );
-    }
-
-    /**
-     * Remove `\t`,`\n`,`\r`,`\0`,`\x0B:` symbols from the string.
-     *
-     * @param string $data
-     * @return string
-     */
-    public function escapeSpecial($data)
-    {
-        $specialSymbolsFiltrationPattern = '/[\t\n\r\0\x0B]+/';
-
-        return (string) preg_replace($specialSymbolsFiltrationPattern, '', $data);
-    }
-
-    /**
-     * Remove `javascript:`, `vbscript:`, `data:` words from the string.
-     *
-     * @param string $data
-     * @return string
-     */
-    public function escapeScriptIdentifiers($data)
-    {
-        $scripIdentifiersFiltrationPattern = '/((javascript(\\\\x3a|:|%3A))|(data(\\\\x3a|:|%3A))|(vbscript:))|'
-            . '((\\\\x6A\\\\x61\\\\x76\\\\x61\\\\x73\\\\x63\\\\x72\\\\x69\\\\x70\\\\x74(\\\\x3a|:|%3A))|'
-            . '(\\\\x64\\\\x61\\\\x74\\\\x61(\\\\x3a|:|%3A)))/i';
-
-        $preFilteredData = $this->escapeSpecial($data);
-        $filteredData = preg_replace($scripIdentifiersFiltrationPattern, ':', $preFilteredData) ?: '';
-        if (preg_match($scripIdentifiersFiltrationPattern, $filteredData)) {
-            $filteredData = $this->escapeScriptIdentifiers($filteredData);
-        }
-
-        return $filteredData;
+        return htmlspecialchars($data);
     }
 
     /**
@@ -442,43 +404,5 @@ abstract class Mage_Core_Helper_Abstract
             $arr[$k] = $v;
         }
         return $arr;
-    }
-
-    /**
-     * Check for tags in multidimensional arrays
-     *
-     * @param string|array $data
-     * @param array $arrayKeys keys of the array being checked that are excluded and included in the check
-     * @param bool $skipTags skip transferred array keys, if false then check only them
-     * @return bool
-     */
-    public function hasTags($data, array $arrayKeys = array(), $skipTags = true)
-    {
-        if (is_array($data)) {
-            foreach ($data as $key => $item) {
-                if ($skipTags && in_array($key, $arrayKeys)) {
-                    continue;
-                }
-                if (is_array($item)) {
-                    if ($this->hasTags($item, $arrayKeys, $skipTags)) {
-                        return true;
-                    }
-                } elseif (
-                    (bool)strcmp($item, $this->removeTags($item))
-                    || (bool)strcmp($key, $this->removeTags($key))
-                ) {
-                    if (!$skipTags && !in_array($key, $arrayKeys)) {
-                        continue;
-                    }
-                    return true;
-                }
-            }
-            return false;
-        } elseif (is_string($data)) {
-            if ((bool)strcmp($data, $this->removeTags($data))) {
-                return true;
-            }
-        }
-        return false;
     }
 }

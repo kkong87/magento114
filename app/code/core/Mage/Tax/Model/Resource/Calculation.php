@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Tax
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -164,15 +164,14 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             }
             $row['rates'][] = $oneRate;
 
-            $ruleId = null;
             if (isset($rates[$i + 1]['tax_calculation_rule_id'])) {
-                $ruleId = $rate['tax_calculation_rule_id'];
+                $rule = $rate['tax_calculation_rule_id'];
             }
             $priority = $rate['priority'];
             $ids[] = $rate['code'];
 
             if (isset($rates[$i + 1]['tax_calculation_rule_id'])) {
-                while (isset($rates[$i + 1]) && $rates[$i + 1]['tax_calculation_rule_id'] == $ruleId) {
+                while (isset($rates[$i + 1]) && $rates[$i + 1]['tax_calculation_rule_id'] == $rule) {
                     $i++;
                 }
             }
@@ -189,7 +188,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
                     $row['percent'] = $this->_collectPercent($totalPercent, $currentRate);
                     $totalPercent += $row['percent'];
                 }
-                $row['id'] = implode('', $ids);
+                $row['id'] = implode($ids);
                 $result[] = $row;
                 $row = array();
                 $ids = array();
@@ -252,7 +251,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
         $customerClassId = $request->getCustomerClassId();
         $countryId = $request->getCountryId();
         $regionId = $request->getRegionId();
-        $postcode = trim($request->getPostcode());
+        $postcode = $request->getPostcode();
 
         // Process productClassId as it can be array or usual value. Form best key for cache.
         $productClassId = $request->getProductClassId();
@@ -312,15 +311,10 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
                 ->where('rate.tax_country_id = ?', $countryId)
                 ->where("rate.tax_region_id IN(?)", array(0, (int)$regionId));
             $postcodeIsNumeric = is_numeric($postcode);
-            $postcodeIsRange = false;
-            if (is_string($postcode) && preg_match('/^(.+)-(.+)$/', $postcode, $matches)) {
-                if (is_numeric($matches[2]) && strlen($matches[2]) < 5) {
-                    $postcodeIsNumeric = true;
-                } else {
-                    $postcodeIsRange = true;
-                    $zipFrom = $matches[1];
-                    $zipTo = $matches[2];
-                }
+            $postcodeIsRange = is_string($postcode) && preg_match('/^(.+)-(.+)$/', $postcode, $matches);
+            if ($postcodeIsRange) {
+                $zipFrom = $matches[1];
+                $zipTo = $matches[2];
             }
 
             if ($postcodeIsNumeric || $postcodeIsRange) {

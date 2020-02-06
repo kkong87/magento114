@@ -379,12 +379,7 @@
 			if (!data)
 				return;
 
-			try {
-				data = JSON.parse(data);
-			} catch (e) {
-				return;
-			}
-
+			data = JSON.parse(data);
 			typeItem = this.getType(node.attr('class'));
 
 			style = node.attr('data-mce-style');

@@ -15,7 +15,6 @@
  * @since       PHP 5.0.0
  * @require     PHP 4.0.0 (user_error)
  */
-/*
 function php_compat_bcpowmod($x, $y, $modulus, $scale = 0)
 {
     // Sanity check
@@ -65,4 +64,3 @@ if (!function_exists('bcpowmod')) {
         return php_compat_bcpowmod($x, $y, $modulus, $scale);
     }
 }
-*/

@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Core
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
@@ -33,14 +33,6 @@
  */
 class Mage_Core_Model_Encryption
 {
-    const HASH_VERSION_MD5    = 0;
-    const HASH_VERSION_SHA512 = 2;
-
-    /**
-     * Encryption method bcrypt
-     */
-    const HASH_VERSION_LATEST = 3;
-
     /**
      * @var Varien_Crypt_Mcrypt
      */
@@ -83,36 +75,13 @@ class Mage_Core_Model_Encryption
     }
 
     /**
-     * Generate hash for customer password
-     *
-     * @param string $password
-     * @param mixed $salt
-     * @return string
-     */
-    public function getHashPassword($password, $salt = null)
-    {
-        if (is_integer($salt)) {
-            $salt = $this->_helper->getRandomString($salt);
-        }
-        return (bool) $salt
-            ? $this->hash($salt . $password, $this->_helper->getVersionHash($this)) . ':' . $salt
-            : $this->hash($password, $this->_helper->getVersionHash($this));
-    }
-
-    /**
      * Hash a string
      *
      * @param string $data
-     * @param int $version
-     * @return bool|string
+     * @return string
      */
-    public function hash($data, $version = self::HASH_VERSION_MD5)
+    public function hash($data)
     {
-        if (self::HASH_VERSION_LATEST === $version && $version === $this->_helper->getVersionHash($this)) {
-            return password_hash($data, PASSWORD_DEFAULT);
-        } elseif (self::HASH_VERSION_SHA512 == $version) {
-            return hash('sha512', $data);
-        }
         return md5($data);
     }
 
@@ -126,31 +95,14 @@ class Mage_Core_Model_Encryption
      */
     public function validateHash($password, $hash)
     {
-        return $this->validateHashByVersion($password, $hash, self::HASH_VERSION_LATEST)
-            || $this->validateHashByVersion($password, $hash, self::HASH_VERSION_SHA512)
-            || $this->validateHashByVersion($password, $hash, self::HASH_VERSION_MD5);
-    }
-
-    /**
-     * Validate hash by specified version
-     *
-     * @param string $password
-     * @param string $hash
-     * @param int $version
-     * @return bool
-     */
-    public function validateHashByVersion($password, $hash, $version = self::HASH_VERSION_MD5)
-    {
-        if ($version == self::HASH_VERSION_LATEST && $version == $this->_helper->getVersionHash($this)) {
-            return password_verify($password, $hash);
+        $hashArr = explode(':', $hash);
+        switch (count($hashArr)) {
+            case 1:
+                return hash_equals($this->hash($password), $hash);
+            case 2:
+                return hash_equals($this->hash($hashArr[1] . $password),  $hashArr[0]);
         }
-        // look for salt
-        $hashArr = explode(':', $hash, 2);
-        if (1 === count($hashArr)) {
-            return hash_equals($this->hash($password, $version), $hash);
-        }
-        list($hash, $salt) = $hashArr;
-        return hash_equals($this->hash($salt . $password, $version), $hash);
+        Mage::throwException('Invalid hash.');
     }
 
     /**

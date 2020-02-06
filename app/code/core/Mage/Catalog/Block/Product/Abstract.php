@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Catalog
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -124,7 +124,21 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     public function getAddToCartUrl($product, $additional = array())
     {
-        return $this->getAddToCartUrlCustom($product, $additional);
+        if (!$product->getTypeInstance(true)->hasRequiredOptions($product)) {
+            return $this->helper('checkout/cart')->getAddUrl($product, $additional);
+        }
+        $additional = array_merge(
+            $additional,
+            array(Mage_Core_Model_Url::FORM_KEY => $this->_getSingletonModel('core/session')->getFormKey())
+        );
+        if (!isset($additional['_escape'])) {
+            $additional['_escape'] = true;
+        }
+        if (!isset($additional['_query'])) {
+            $additional['_query'] = array();
+        }
+        $additional['_query']['options'] = 'cart';
+        return $this->getProductUrl($product, $additional);
     }
 
     /**
@@ -150,7 +164,15 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     public function getSubmitUrl($product, $additional = array())
     {
-        return $this->getSubmitUrlCustom($product, $additional);
+        $submitRouteData = $this->getData('submit_route_data');
+        if ($submitRouteData) {
+            $route = $submitRouteData['route'];
+            $params = isset($submitRouteData['params']) ? $submitRouteData['params'] : array();
+            $submitUrl = $this->getUrl($route, array_merge($params, $additional));
+        } else {
+            $submitUrl = $this->getAddToCartUrl($product, $additional);
+        }
+        return $submitUrl;
     }
 
     /**
@@ -161,7 +183,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     public function getAddToWishlistUrl($product)
     {
-        return $this->getAddToWishlistUrlCustom($product);
+        return $this->helper('wishlist')->getAddUrl($product);
     }
 
     /**
@@ -172,7 +194,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     public function getAddToCompareUrl($product)
     {
-        return $this->getAddToCompareUrlCustom($product);
+        return $this->helper('catalog/product_compare')->getAddUrl($product);
     }
 
     /**
@@ -629,36 +651,6 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     }
 
     /**
-     * Return link to Add to Wishlist with or without Form Key
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function getAddToWishlistUrlCustom($product, $addFormKey = true)
-    {
-        if (!$addFormKey) {
-            return $this->helper('wishlist')->getAddUrlWithCustomParams($product, array(), false);
-        }
-        return $this->helper('wishlist')->getAddUrl($product);
-    }
-
-    /**
-     * Retrieve Add Product to Compare Products List URL with or without Form Key
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function getAddToCompareUrlCustom($product, $addFormKey = true)
-    {
-        if (!$addFormKey) {
-            return $this->helper('catalog/product_compare')->getAddUrlCustom($product, false);
-        }
-        return $this->helper('catalog/product_compare')->getAddUrl($product);
-    }
-
-    /**
      * If exists price template block, retrieve price blocks from it
      *
      * @return Mage_Catalog_Block_Product_Abstract
@@ -676,65 +668,5 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
         }
 
         return $this;
-    }
-
-    /**
-     * Retrieve url for add product to cart with or without Form Key
-     * Will return product view page URL if product has required options
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param array $additional
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function  getAddToCartUrlCustom($product, $additional = array(), $addFormKey = true)
-    {
-        if (!$product->getTypeInstance(true)->hasRequiredOptions($product)) {
-            if (!$addFormKey) {
-                return $this->helper('checkout/cart')->getAddUrlCustom($product, $additional, false);
-            }
-            return $this->helper('checkout/cart')->getAddUrl($product, $additional);
-        }
-        if ($addFormKey) {
-            $additional = array_merge(
-                $additional,
-                array(Mage_Core_Model_Url::FORM_KEY => $this->_getSingletonModel('core/session')->getFormKey())
-            );
-        }
-        if (!isset($additional['_escape'])) {
-            $additional['_escape'] = true;
-        }
-        if (!isset($additional['_query'])) {
-            $additional['_query'] = array();
-        }
-        $additional['_query']['options'] = 'cart';
-        return $this->getProductUrl($product, $additional);
-    }
-
-    /**
-     * Retrieves url for form submitting:
-     * some objects can use setSubmitRouteData() to set route and params for form submitting,
-     * otherwise default url will be used with or without Form Key
-     *
-     * @param Mage_Catalog_Model_Product $product
-     * @param array $additional
-     * @param bool $addFormKey
-     * @return string
-     */
-    public function getSubmitUrlCustom($product, $additional = array(), $addFormKey = true)
-    {
-        $submitRouteData = $this->getData('submit_route_data');
-        if ($submitRouteData) {
-            $route = $submitRouteData['route'];
-            $params = isset($submitRouteData['params']) ? $submitRouteData['params'] : array();
-            $submitUrl = $this->getUrl($route, array_merge($params, $additional));
-        } else {
-            if ($addFormKey) {
-                $submitUrl = $this->getAddToCartUrl($product, $additional);
-            } else {
-                $submitUrl = $this->getAddToCartUrlCustom($product, $additional, false);
-            }
-        }
-        return $submitUrl;
     }
 }

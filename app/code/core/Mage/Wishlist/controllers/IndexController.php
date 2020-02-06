@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Wishlist
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -136,13 +136,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             return $this->norouteAction();
         }
         $this->loadLayout();
-
-        if ($this->_isFormKeyEnabled() && strpos($this->_getRefererUrl(), 'login')) {
-            Mage::getSingleton('core/session')->addError(Mage::helper('wishlist')->__(
-                'Please add product to wishlist again.'
-            ));
-            return $this->_redirectUrl(Mage::getSingleton('customer/session')->getBeforeWishlistUrl());
-        }
 
         $session = Mage::getSingleton('customer/session');
         $block   = $this->getLayout()->getBlock('customer.wishlist');
@@ -643,9 +636,6 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         $error   = false;
         if (empty($emails)) {
             $error = $this->__('Email address can\'t be empty.');
-        }
-        elseif (count($emails) > 5) {
-            $error = $this->__('Please enter no more than 5 email addresses.');
         }
         else {
             foreach ($emails as $index => $email) {

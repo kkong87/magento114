@@ -1,13 +1,13 @@
 <?php
 /**
- * Magento Enterprise Edition
+ * Magento
  *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Magento Enterprise Edition End User License Agreement
- * that is bundled with this package in the file LICENSE_EE.txt.
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
  * It is also available through the world-wide-web at this URL:
- * http://www.magento.com/license/enterprise-edition
+ * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
  * to license@magento.com so we can send you a copy immediately.
@@ -20,8 +20,8 @@
  *
  * @category    Mage
  * @package     Mage_Sendfriend
- * @copyright Copyright (c) 2006-2020 Magento, Inc. (http://www.magento.com)
- * @license http://www.magento.com/license/enterprise-edition
+ * @copyright  Copyright (c) 2006-2018 Magento, Inc. (http://www.magento.com)
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 
@@ -97,11 +97,7 @@ class Mage_Sendfriend_Block_Send extends Mage_Core_Block_Template
     {
         $data = $this->getData('form_data');
         if (!$data instanceof Varien_Object) {
-            $formData = Mage::getSingleton('catalog/session')->getFormData(true);
             $data = new Varien_Object();
-            if ($formData) {
-                $data->addData($formData);
-            }
             $this->setData('form_data', $data);
         }
 
@@ -151,17 +147,6 @@ class Mage_Sendfriend_Block_Send extends Mage_Core_Block_Template
     public function getMaxRecipients()
     {
         return Mage::helper('sendfriend')->getMaxRecipients();
-    }
-
-    /**
-     * Retrieve count of recipients
-     *
-     * @return int
-     */
-    public function getRecipientsCount()
-    {
-        $recipientsEmail = $this->getFormData()->getData('recipients/email');
-        return (is_array($recipientsEmail)) ? count($recipientsEmail) : 0;
     }
 
     /**

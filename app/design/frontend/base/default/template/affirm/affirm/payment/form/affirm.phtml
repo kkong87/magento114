@@ -1,0 +1,21 @@
+<?php
+/** @var Affirm_Affirm_Block_Payment_Form $this **/
+?>
+<style type="text/css">
+    .affirm-module-version {
+        display: none;
+    }
+
+    .affirm_payment_info {
+        color: #6f6f6f;
+        font-size: 14px;
+    }
+</style>
+<ul class="form-list affirm" id="payment_form_affirm" style="display:none;">
+    <li class="form-alt">
+            <div class="affirm_payment_info">
+                <p><?php echo $this->__('You will be redirected to Affirm to securely complete your purchase. Just fill out a few pieces of basic information and get a real-time decision. Checking your eligibility won\'t affect your credit score.'); ?></p>
+            </div>
+    </li>
+</ul>
+<span class="affirm-module-version"><?php echo $this->helper('affirm')->getModuleConfigVersion(); ?></span>

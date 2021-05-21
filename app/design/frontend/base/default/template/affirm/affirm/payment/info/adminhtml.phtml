@@ -1,0 +1,14 @@
+<?php
+/** @var Affirm_Affirm_Block_Payment_Info $this **/
+
+$orderId = $this->getRequest()->getParam('order_id');
+$exchangeID = Mage::helper('affirm')->getExchangeID($orderId);
+
+?>
+
+<?php if( isset($exchangeID) && $exchangeID !== 1): ?>
+    <?php echo Mage::helper('affirm')->getExchange($orderId); ?> Presented by Affirm
+<?php else: ?>
+    <span class="info"><a href="<?php echo $this->getAffirmSiteUrl(); ?>"><?php echo $this->__('Affirm'); ?></a></span>
+<?php endif; ?>
+
